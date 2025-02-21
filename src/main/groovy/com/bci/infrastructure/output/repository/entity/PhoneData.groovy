@@ -6,7 +6,11 @@ import lombok.experimental.FieldDefaults
 
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
 import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
 import javax.persistence.Table
 
 @Entity(name = "Phone")
@@ -15,10 +19,14 @@ import javax.persistence.Table
 @FieldDefaults(level = AccessLevel.PRIVATE)
 class PhoneData {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     Long number;
     @Column(name = "city_code")
-    Integer cityCode;
+    Integer cityCode
     @Column(name = "country_code")
     String countryCode;
+    @ManyToOne
+    @JoinColumn(name = "userId")
+    UserData user
 }

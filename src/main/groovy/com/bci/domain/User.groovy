@@ -4,7 +4,7 @@ import com.bci.infrastructure.output.repository.entity.PhoneData
 import groovy.transform.Canonical
 import groovy.transform.builder.Builder
 
-import java.time.LocalDateTime
+import java.time.LocalDate
 
 @Canonical
 @Builder
@@ -15,8 +15,8 @@ class User {
     String email;
     String password;
     List<PhoneData> phones;
-    LocalDateTime created;
-    LocalDateTime lastLogin;
+    LocalDate created;
+    LocalDate lastLogin;
     String token;
     boolean isActive;
 }

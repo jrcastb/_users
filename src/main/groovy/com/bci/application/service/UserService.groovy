@@ -8,20 +8,20 @@ import com.bci.domain.SignUpRequest
 import com.bci.domain.SignUpResponse
 import com.bci.domain.User
 import com.bci.infrastructure.config.JasyptEncryptorConfig
+import com.bci.infrastructure.exception.BusinessException
+import com.bci.infrastructure.exception.messages.BusinessErrorMessage
 import com.bci.infrastructure.helper.RequestValidator
 import com.bci.infrastructure.output.adapter.UserAdapterRepository
-import com.bci.infrastructure.output.repository.entity.PhoneData
-import com.bci.infrastructure.output.repository.entity.UserData
 import com.bci.infrastructure.security.JwtUtil
-import groovy.transform.Canonical
 import groovy.util.logging.Slf4j
 import org.jasypt.encryption.StringEncryptor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
+import java.time.LocalDate
+
 @Service
 @Slf4j
-@Canonical
 class UserService implements UserApi {
     private final RequestValidator requestValidator
     private final UserAdapterRepository userAdapterRepository
@@ -39,163 +39,104 @@ class UserService implements UserApi {
 
     @Override
     SignUpResponse signUp(SignUpRequest request) {
-        try {
-            // Validar request
-            validateRequest(request)
 
-            // Validar que el email no exista en la base de datos
-            validateEmailExists(request.email)
+        // Validar request
+        validateRequest(request)
 
-            // Encriptar contraseña
-            String passwordEncrypt = JasyptEncryptorConfig.passwordEncryptor().encrypt(request.password)
-            log.info("sign-up - Password encriptado: {}", passwordEncrypt)
+        // Validar que el email no exista en la base de datos
+        validateEmailExists(request.email)
 
-            // Generar token JWT
-            String jwt = jwtUtil.generateToken(request.email)
+        // Encriptar contraseña
+        String passwordEncrypt = JasyptEncryptorConfig.passwordEncryptor().encrypt(request.password)
+        log.info("sign-up - Password encriptado: {}", passwordEncrypt)
 
-            // Crear y guardar el usuario
-            User userEntity = mapper.toDomain(request, passwordEncrypt, jwt)
+        // Generar token JWT
+        String jwt = jwtUtil.generateToken(request.email)
 
-            // Armar respuesta
-            return mapper.toResponse(userAdapterRepository.save(userEntity))
+        // Crear y guardar el usuario
+        User userEntity = mapper.toDomain(request, passwordEncrypt, jwt)
 
-        } catch (ErrorValidacionDTO | ErrorGeneralDTO e) {
-            log.error("sign-up - Error: {}", e.message)
-            throw e
-        } catch (Exception e) {
-            log.error("sign-up - Error general: {}", e.message)
-            throw new ErrorGeneralDTO(0, "Error general: ${e.message}")
-        } finally {
-            log.info("sign-up - Fin ServiceImpl")
-        }
+        // Armar respuesta
+        return mapper.toResponse(userAdapterRepository.save(userEntity))
     }
 
     @Override
     LoginResponse login(String token) {
         log.info("login - Inicio ServiceImpl")
 
-        try {
-            // Validar token
-            validateToken(token)
+        // Validar token
+        validateToken(token)
 
-            // Obtener email desde el token
-            String email = jwtTokenUtil.getEmailFromJwt(token)
-            log.info("login - Email obtenido: {}", email)
+        // Obtener email desde el token
+        String email = jwtTokenUtil.getEmailFromJwt(token)
+        log.info("login - Email obtenido: {}", email)
 
-            // Buscar usuario por email
-            UserData userEntity = findUserByEmail(email)
+        // Buscar usuario por email
+        User user = userAdapterRepository.findByEmail(email).orElse(null) //findUserByEmail(email)
 
-            // Validar token del usuario
-            validateUserToken(userEntity, token)
+        // Validar token del usuario
+        validateUserToken(user, token)
 
-            // Generar nuevo token y actualizar base de datos
-            String newJwt = jwtTokenUtil.generarToken(email)
-            updateUserTokenAndLastLogin(newJwt, email)
+        // Generar nuevo token y actualizar base de datos
+        String newJwt = jwtUtil.generateToken(email)
+        updateUserTokenAndLastLogin(newJwt, email)
 
-            // Armar respuesta
-            return createLoginResponse(userEntity, newJwt)
+        // Armar respuesta
+        StringEncryptor stringEncryptor = JasyptEncryptorConfig.passwordEncryptor()
+        LoginResponse response = mapper.toLoginResponse(user, newJwt)
+        response.password = stringEncryptor.decrypt(response.password)
 
-        } catch (ErrorValidacionDTO | ErrorGeneralDTO e) {
-            log.error("login - Error: {}", e.message)
-            throw e
-        } catch (Exception e) {
-            log.error("login - Error general: {}", e.message)
-            throw new ErrorGeneralDTO(0, "Error general: ${e.message}")
-        } finally {
-            log.info("login - Fin ServiceImpl")
-        }
+        return response
+
     }
 
     private void validateRequest(SignUpRequest request) {
         String validationRequest = requestValidator.validateRequestSignUp(request)
         if (validationRequest != "Valido") {
             log.error("sign-up - Error en validación del request: {}", validationRequest)
-            throw new ErrorValidacionDTO(1, validationRequest)
+            throw new BusinessException(BusinessErrorMessage.BAD_REQUEST_BODY)
         }
 
         if (!requestValidator.validateEmail(request.email)) {
             log.error("sign-up - Error en formato de email")
-            throw new ErrorValidacionDTO(2, "El email no tiene formato válido.")
+            throw new BusinessException(BusinessErrorMessage.BAD_REQUEST_BODY)
         }
 
         String validationPassword = requestValidator.validatePassword(request.password)
         if (validationPassword != "Valido") {
             log.error("sign-up - Error en validación de password: {}", validationPassword)
-            throw new ErrorValidacionDTO(3, validationPassword)
+            throw new BusinessException(BusinessErrorMessage.BAD_REQUEST_BODY)
         }
     }
 
     private void validateEmailExists(String email) {
-        Optional<UserData> userEntityOptional = userAdapterRepository.findByEmail(email)
-        if (userEntityOptional.isPresent()) {
-            log.error("sign-up - Email ya registrado: {}", email)
-            throw new ErrorValidacionDTO(4, "El email ya está registrado.")
+        userAdapterRepository.findByEmail(email).ifPresent { user ->
+            log.error("sign-up - Email ya registrado: {}", user.email)
+            new BusinessException(BusinessErrorMessage.BAD_REQUEST_BODY)
         }
     }
 
     private void validateToken(String token) {
         if (token == null || token.isEmpty()) {
             log.error("login - Token vacío o nulo")
-            throw new ErrorValidacionDTO(1, "Token vacío o nulo")
+            throw new BusinessException(BusinessErrorMessage.BAD_REQUEST_BODY)
         }
 
-        if (jwtTokenUtil.isTokenExpirado(token)) {
+        if (jwtUtil.isTokenExpired(token)) {
             log.error("login - Token expirado")
-            throw new ErrorValidacionDTO(2, "Token expirado")
+            throw new BusinessException(BusinessErrorMessage.BAD_REQUEST_BODY)
         }
     }
 
-    private UserData findUserByEmail(String email) {
-        try {
-            return userRepository.findByEmail(email).orElseThrow {
-                log.error("login - Email no registrado: {}", email)
-                throw new ErrorValidacionDTO(4, "El email no está registrado.")
-            }
-        } catch (RuntimeException e) {
-            log.error("login - Error al buscar usuario: {}", e.message)
-            throw new ErrorGeneralDTO(3, "Error al buscar usuario: ${e.message}")
-        }
-    }
-
-    private void validateUserToken(UserData userEntity, String token) {
+    private static void validateUserToken(User userEntity, String token) {
         if (userEntity.token != token) {
             log.error("login - Token no válido")
-            throw new ErrorValidacionDTO(5, "Token no válido")
+            throw new BusinessException(BusinessErrorMessage.BAD_REQUEST_BODY)
         }
     }
 
     private void updateUserTokenAndLastLogin(String newJwt, String email) {
-        try {
-            userRepository.actualizarTokenYLastLoginPorEmail(newJwt, LocalDate.now(), email)
-            log.info("login - Token y last_login actualizados")
-        } catch (RuntimeException e) {
-            log.error("login - Error al actualizar token: {}", e.message)
-            throw new ErrorGeneralDTO(6, "Error al actualizar token: ${e.message}")
-        }
-    }
-
-    private LoginResponse createLoginResponse(UserData userEntity, String newJwt) {
-        StringEncryptor stringEncryptor = JasyptEncryptorConfig.passwordEncryptor()
-        return new LoginResponse(
-                id: userEntity.id,
-                created: userEntity.created,
-                lastLogin: LocalDate.now(),
-                token: newJwt,
-                isActive: userEntity.isActive,
-                name: userEntity.name,
-                email: userEntity.email,
-                password: stringEncryptor.decrypt(userEntity.password),
-                phones: convertirEntityAPhone(userEntity.phones)
-        )
-    }
-
-    private static List<Phone> convertirEntityAPhone(List<PhoneData> phones) {
-        return phones?.collect { phoneEntity ->
-            new Phone(
-                    number: phoneEntity.number,
-                    citycode: phoneEntity.cityCode,
-                    countrycode: phoneEntity.countryCode
-            )
-        } ?: []
+        userAdapterRepository.updateTokenAndLastLogin(newJwt, LocalDate.now(), email)
+        log.info("login - Token y last_login actualizados")
     }
 }

@@ -14,6 +14,6 @@ interface UserRepository extends JpaRepository<UserData, UUID> {
     Optional<UserData> findByEmail(String email);
 
     @Query("UPDATE User SET token = :token, lastLogin = :lastLogin WHERE email = :email")
-    void updateTokenAndLastLoginByEmail(@Param String token, @Param LocalDate lastLogin, @Param String email)
+    void updateTokenAndLastLoginByEmail(@Param("token") String token, @Param("lastLogin") LocalDate lastLogin, @Param("email") String email)
 
 }

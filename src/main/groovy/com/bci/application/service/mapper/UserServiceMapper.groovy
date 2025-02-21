@@ -1,18 +1,17 @@
 package com.bci.application.service.mapper
 
+import com.bci.domain.LoginResponse
 import com.bci.domain.SignUpRequest
 import com.bci.domain.SignUpResponse
 import com.bci.domain.User
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
-import org.mapstruct.MappingConstants
-import org.mapstruct.ReportingPolicy
+import org.mapstruct.factory.Mappers
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
+//@Mapper(componentModel = ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring")
 interface UserServiceMapper {
+    UserServiceMapper INSTANCE = Mappers.getMapper(UserServiceMapper.class)
 
     @Mapping(target = "name", source = "request.name")
     @Mapping(target = "email", source = "request.email")
@@ -29,5 +28,10 @@ interface UserServiceMapper {
     @Mapping(target = "token", source = "user.token")
     @Mapping(target = "isActive", source = "user.isActive")
     SignUpResponse toResponse(User user)
+
+    @Mapping(target = "lastLogin", expression = "java(java.time.LocalDate.now())")
+    @Mapping(target = "token", source = "newJwt")
+    @Mapping(target = "phones", source = "phones")
+    LoginResponse toLoginResponse(User user, String newJwt)
 
 }

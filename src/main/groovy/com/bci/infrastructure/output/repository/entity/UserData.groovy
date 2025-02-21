@@ -1,40 +1,37 @@
 package com.bci.infrastructure.output.repository.entity
 
+import groovy.transform.builder.Builder
 import lombok.AccessLevel
 import lombok.AllArgsConstructor
-import lombok.Builder
-import lombok.Getter
 import lombok.NoArgsConstructor
-import lombok.Setter
 import lombok.experimental.FieldDefaults
 import org.hibernate.annotations.DynamicInsert
 import org.hibernate.annotations.DynamicUpdate
 
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.OneToMany
 import javax.persistence.Table
 import java.time.LocalDate
-import java.time.LocalDateTime
 
-@Getter
-@Setter
-@Builder(toBuilder = true)
+@Builder
 @DynamicUpdate
 @DynamicInsert
 @Entity(name = "User")
 @Table(name = "users")
-@NoArgsConstructor
-@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 class UserData {
     @Id
-    UUID id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id")
+    UUID userId;
     String name;
     String email;
     String password;
-    @OneToMany(mappedBy = "PhoneData")
+    @OneToMany(mappedBy = "user")
     List<PhoneData> phones;
     LocalDate created;
     @Column(name = "last_login")
