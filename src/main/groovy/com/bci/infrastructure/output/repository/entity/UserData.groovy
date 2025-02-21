@@ -15,6 +15,7 @@ import javax.persistence.Entity
 import javax.persistence.Id
 import javax.persistence.OneToMany
 import javax.persistence.Table
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Getter
@@ -35,9 +36,9 @@ class UserData {
     String password;
     @OneToMany(mappedBy = "PhoneData")
     List<PhoneData> phones;
-    LocalDateTime created;
+    LocalDate created;
     @Column(name = "last_login")
-    LocalDateTime lastLogin;
+    LocalDate lastLogin;
     String token;
     @Column(name = "is_active")
     boolean isActive;

@@ -1,20 +1,21 @@
 package com.bci.infrastructure.exception.messages
 
-import lombok.Getter
-import lombok.RequiredArgsConstructor
 import org.springframework.http.HttpStatus
 
 import java.sql.Timestamp
-import java.time.LocalDate
 
-@Getter
-@RequiredArgsConstructor
 enum BusinessErrorMessage {
 
-    BAD_REQUEST_BODY(LocalDate.now(), HttpStatus.BAD_REQUEST, "Error in body request"),
-    USER_NOT_FOUND(LocalDate.now(), HttpStatus.BAD_REQUEST, "Error in body request")
+    BAD_REQUEST_BODY(new Timestamp(System.currentTimeMillis()), HttpStatus.BAD_REQUEST.value(), "Error in body request"),
+    USER_NOT_FOUND(new Timestamp(System.currentTimeMillis()), HttpStatus.BAD_REQUEST.value(), "User not found")
 
-    private final Timestamp timeStamp;
-    private final Integer code;
-    private final String detail;
+    final Timestamp timeStamp;
+    final int codigo;
+    final String detail;
+
+    BusinessErrorMessage(Timestamp timestamp, int codigo, String detail){
+        this.timeStamp = timestamp
+        this.codigo = codigo
+        this.detail = detail
+    }
 }

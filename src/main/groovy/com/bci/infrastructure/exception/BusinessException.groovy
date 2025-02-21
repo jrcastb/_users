@@ -2,12 +2,12 @@ package com.bci.infrastructure.exception
 
 import com.bci.infrastructure.exception.messages.BusinessErrorMessage
 import lombok.AccessLevel
-import lombok.Getter
 import lombok.experimental.FieldDefaults
 
-@Getter
+
 @FieldDefaults(level = AccessLevel.PRIVATE)
 class BusinessException extends RuntimeException {
+
     final BusinessErrorMessage businessErrorMessage;
     final String extra;
 
