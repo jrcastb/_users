@@ -3,7 +3,6 @@ package com.bci.application.service
 import com.bci.application.input.port.UserApi
 import com.bci.application.service.mapper.UserServiceMapper
 import com.bci.domain.LoginResponse
-import com.bci.domain.Phone
 import com.bci.domain.SignUpRequest
 import com.bci.domain.SignUpResponse
 import com.bci.domain.User
@@ -29,7 +28,7 @@ class UserService implements UserApi {
     private final UserServiceMapper mapper
 
     @Autowired
-    UserService(UserAdapterRepository userAdapterRepository, JwtUtil jwtUtil, RequestValidator requestValidator, UserServiceMapper mapper) {
+    UserService(UserAdapterRepository userAdapterRepository, JwtUtil jwtUtil, RequestValidator requestValidator , UserServiceMapper mapper){
         this.jwtUtil = jwtUtil
         this.userAdapterRepository = userAdapterRepository
         this.requestValidator = requestValidator
@@ -68,11 +67,11 @@ class UserService implements UserApi {
         validateToken(token)
 
         // Obtener email desde el token
-        String email = jwtTokenUtil.getEmailFromJwt(token)
+        String email = jwtUtil.getEmailFromToken(token)
         log.info("login - Email obtenido: {}", email)
 
         // Buscar usuario por email
-        User user = userAdapterRepository.findByEmail(email).orElse(null) //findUserByEmail(email)
+        User user = userAdapterRepository.findByEmail(email).orElse(null)
 
         // Validar token del usuario
         validateUserToken(user, token)

@@ -16,63 +16,58 @@ import org.springframework.web.bind.annotation.ResponseStatus
 @ControllerAdvice
 class GlobalExceptionHandler {
 
+
+
     @ExceptionHandler(BusinessException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ResponseEntity<ErrorModel> handleExceptions(BusinessException ex){
-        return new ResponseEntity<>(getErrorResponses(ex), HttpStatus.BAD_REQUEST)
+    ResponseEntity<ErrorModel> handleBusinessException(BusinessException ex) {
+        ErrorModel ErrorModel = new ErrorModel();
+        ErrorModel.setTimestamp(ex.getBusinessErrorMessage().getTimestamp());
+        ErrorModel.setCodigo(ex.getBusinessErrorMessage().getCodigo());
+        ErrorModel.setDetail(ex.getBusinessErrorMessage().getDetail());
+        return new ResponseEntity<>(ErrorModel, HttpStatus.BAD_REQUEST);
     }
 
+    // Manejo de TechnicalException
     @ExceptionHandler(TechnicalException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ResponseEntity<ErrorModel> handleExceptions(TechnicalException ex){
-        return new ResponseEntity<>(getErrorResponses(ex), HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    ResponseEntity<ErrorModel> handleTechnicalException(TechnicalException ex) {
+        ErrorModel ErrorModel = new ErrorModel();
+        ErrorModel.setTimestamp(ex.getTechnicalErrorMessage().getTimestamp());
+        ErrorModel.setCodigo(ex.getTechnicalErrorMessage().getCodigo());
+        ErrorModel.setDetail(ex.getTechnicalErrorMessage().getDetail());
+        return new ResponseEntity<>(ErrorModel, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    // Manejo de excepciones genéricas
     @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    ResponseEntity<ErrorModel> handleGenericException(Exception ex) {
+        ErrorModel ErrorModel = new ErrorModel();
+        ErrorModel.setTimestamp(TechnicalErrorMessage.UNEXPECTED_ERROR.getTimestamp());
+        ErrorModel.setCodigo(TechnicalErrorMessage.UNEXPECTED_ERROR.getCodigo());
+        ErrorModel.setDetail(TechnicalErrorMessage.UNEXPECTED_ERROR.getDetail());
+        return new ResponseEntity<>(ErrorModel, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // Manejo de excepciones específicas de Spring
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ResponseEntity<ErrorModel> handleExceptions(Exception ex){
-        return new ResponseEntity<>(getErrorResponses(ex), HttpStatus.BAD_REQUEST)
+    ResponseEntity<ErrorModel> handleSpringExceptions(Exception ex) {
+        ErrorModel ErrorModel = new ErrorModel();
+        ErrorModel.setTimestamp(BusinessErrorMessage.BAD_REQUEST_BODY.getTimestamp())
+        ErrorModel.setCodigo(BusinessErrorMessage.BAD_REQUEST_BODY.getCodigo())
+        ErrorModel.setDetail(BusinessErrorMessage.BAD_REQUEST_BODY.getDetail())
+        return new ResponseEntity<>(ErrorModel, HttpStatus.BAD_REQUEST)
     }
 
-    private static ErrorModel getErrorResponses(BusinessException businessException){
-        return ErrorModel.builder()
-                .timestamp(businessException.businessErrorMessage.timeStamp)
-                .codigo(businessException.businessErrorMessage.codigo)
-                .detail(businessException.businessErrorMessage.detail)
-                .build()
-    }
-
-    private static ErrorModel getErrorResponses(TechnicalException technicalException){
-        return ErrorModel.builder()
-                .timestamp(technicalException.technicalErrorMessage.timeStamp)
-                .codigo(technicalException.technicalErrorMessage.codigo)
-                .detail(technicalException.technicalErrorMessage.detail)
-                .build()
-    }
-
-    private static ErrorModel getErrorResponses(Exception exception){
-        ErrorModel errorResponse;
-        try {
-            throw exception
-        } catch (HttpRequestMethodNotSupportedException e){
-            errorResponse = ErrorModel.builder()
-                    .timestamp(TechnicalErrorMessage.SERVICE_NOT_FOUND.timeStamp)
-                    .codigo(TechnicalErrorMessage.SERVICE_NOT_FOUND.codigo)
-                    .detail(TechnicalErrorMessage.SERVICE_NOT_FOUND.detail)
-                    .build()
-        } catch (MethodArgumentNotValidException e){
-            errorResponse = ErrorModel.builder()
-                    .timestamp(BusinessErrorMessage.BAD_REQUEST_BODY.timeStamp)
-                    .codigo(BusinessErrorMessage.BAD_REQUEST_BODY.codigo)
-                    .detail(BusinessErrorMessage.BAD_REQUEST_BODY.detail)
-                    .build()
-        } catch (Exception e){
-            errorResponse = ErrorModel.builder()
-                    .timestamp(TechnicalErrorMessage.UNEXPECTED_EXCEPTION.timeStamp)
-                    .codigo(TechnicalErrorMessage.UNEXPECTED_EXCEPTION.codigo)
-                    .detail(TechnicalErrorMessage.UNEXPECTED_EXCEPTION.detail)
-                    .build()
-        }
-        return errorResponse
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ResponseEntity<ErrorModel> handleSpringsExceptions(Exception ex) {
+        ErrorModel ErrorModel = new ErrorModel();
+        ErrorModel.setTimestamp(BusinessErrorMessage.BAD_REQUEST_BODY.getTimestamp())
+        ErrorModel.setCodigo(BusinessErrorMessage.BAD_REQUEST_BODY.getCodigo())
+        ErrorModel.setDetail(BusinessErrorMessage.BAD_REQUEST_BODY.getDetail())
+        return new ResponseEntity<>(ErrorModel, HttpStatus.BAD_REQUEST)
     }
 }

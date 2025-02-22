@@ -24,8 +24,7 @@ class JasyptEncryptorConfig {
      * @return Un StringEncryptor configurado.
      * @throws IllegalArgumentException Si la configuración es inválida.
      */
-    @Bean
-    PooledPBEStringEncryptor passwordEncryptor() {
+    static PooledPBEStringEncryptor passwordEncryptor() {
         try {
             PooledPBEStringEncryptor encryptor = new PooledPBEStringEncryptor()
             SimpleStringPBEConfig config = new SimpleStringPBEConfig()

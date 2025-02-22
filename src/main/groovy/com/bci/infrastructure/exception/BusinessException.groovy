@@ -9,15 +9,9 @@ import lombok.experimental.FieldDefaults
 class BusinessException extends RuntimeException {
 
     final BusinessErrorMessage businessErrorMessage;
-    final String extra;
 
-    public BusinessException(BusinessErrorMessage businessErrorMessage, String extra){
-        this.businessErrorMessage = businessErrorMessage;
-        this.extra = extra;
-    }
 
-    public BusinessException(BusinessErrorMessage businessErrorMessage){
+    BusinessException(BusinessErrorMessage businessErrorMessage){
         this.businessErrorMessage = businessErrorMessage;
-        this.extra = "";
     }
 }

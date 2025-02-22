@@ -14,7 +14,7 @@ class User {
     String name;
     String email;
     String password;
-    List<PhoneData> phones;
+    List<Phone> phones;
     LocalDate created;
     LocalDate lastLogin;
     String token;

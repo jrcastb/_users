@@ -6,7 +6,7 @@ import com.bci.infrastructure.exception.TechnicalException
 import com.bci.infrastructure.exception.messages.TechnicalErrorMessage
 import com.bci.infrastructure.output.adapter.mapper.UserMapper
 import com.bci.infrastructure.output.repository.UserRepository
-import groovy.transform.Canonical
+import com.bci.infrastructure.output.repository.entity.UserData
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -27,7 +27,8 @@ class UserAdapterRepository implements UserDb {
     @Override
     Optional<User> findByEmail(String email) {
         try{
-            return Optional.of(mapper.toDomain(repository.findByEmail(email).orElse(null)))
+            return repository.findByEmail(email)
+                    .map { userData -> mapper.toDomain(userData) }
         }catch (Exception e){
             throw new TechnicalException(e, TechnicalErrorMessage.USER_FIND_ONE)
         }

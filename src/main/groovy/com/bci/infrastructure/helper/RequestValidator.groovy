@@ -54,7 +54,7 @@ class RequestValidator {
         }
 
         if (response.toString() == initialMessage) {
-            return "Válido"
+            return "Valido"
         } else {
             response.append(" ]")
             return response.toString().replaceAll(",,", ",")
@@ -104,6 +104,6 @@ class RequestValidator {
             return "Debe tener exactamente una mayúscula"
         }
 
-        return "Válido"
+        return "Valido"
     }
 }

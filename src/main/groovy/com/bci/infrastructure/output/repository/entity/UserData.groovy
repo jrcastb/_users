@@ -3,6 +3,7 @@ package com.bci.infrastructure.output.repository.entity
 import groovy.transform.builder.Builder
 import lombok.AccessLevel
 import lombok.AllArgsConstructor
+import lombok.Data
 import lombok.NoArgsConstructor
 import lombok.experimental.FieldDefaults
 import org.hibernate.annotations.DynamicInsert
@@ -17,9 +18,12 @@ import javax.persistence.OneToMany
 import javax.persistence.Table
 import java.time.LocalDate
 
+@Data
 @Builder
 @DynamicUpdate
 @DynamicInsert
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity(name = "User")
 @Table(name = "users")
 @FieldDefaults(level = AccessLevel.PRIVATE)
