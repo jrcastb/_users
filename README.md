@@ -160,12 +160,10 @@ El proyecto incluye los siguientes diagramas UML:
 1. Diagrama de Componentes: Muestra la estructura del microservicio y las interacciones entre sus componentes.
 
    ![Alt text](././diagrams/users_component_diagram.jpg)
-   <img src="./diagrams/users_component_diagram.jpg">
 
 2. Diagrama de Secuencia: Ilustra el flujo de las operaciones principales, como el registro y el login de usuarios.
 
    ![Alt text](././diagrams/users_sequence_diagram.svg)
-   <img src="./diagrams/users_sequence_diagram.svg">
 
 Los diagramas se encuentran en la carpeta /diagrams.
 
