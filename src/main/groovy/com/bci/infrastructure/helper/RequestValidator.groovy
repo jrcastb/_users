@@ -16,27 +16,18 @@ class RequestValidator {
     private static final Pattern PASSWORD_DIGITS_PATTERN = Pattern.compile('^(?=(?:[^0-9]*\\d){2}[^0-9]*$).*')
     private static final Pattern PASSWORD_UPPERCASE_PATTERN = Pattern.compile('^(?=[^A-Z]*[A-Z][^A-Z]*$).*')
 
-    /**
-     * Valida un objeto RegisterRequestDTO.
-     *
-     * @param request El objeto a validar.
-     * @return Un mensaje indicando si la validación fue exitosa o los errores encontrados.
-     */
     static String validateRequestSignUp(SignUpRequest request) {
         final String initialMessage = "Error en la validación de los campos ["
         StringBuilder response = new StringBuilder(initialMessage)
 
-        // Validar email
         if (!validateRequest(request.email)) {
             response.append(" email,")
         }
 
-        // Validar password
         if (!validateRequest(request.password)) {
             response.append(" password,")
         }
 
-        // Validar phones si no es null
         if (request.phones != null) {
             request.phones.eachWithIndex { phone, index ->
                 final String model = " (phone posición=${index + 1}-"
@@ -61,32 +52,14 @@ class RequestValidator {
         }
     }
 
-    /**
-     * Valida si una cadena no es nula ni vacía.
-     *
-     * @param request La cadena a validar.
-     * @return true si la cadena es válida, false en caso contrario.
-     */
     private static Boolean validateRequest(String request) {
         return request != null && !request.isEmpty()
     }
 
-    /**
-     * Valida el formato de un email.
-     *
-     * @param email El email a validar.
-     * @return true si el email es válido, false en caso contrario.
-     */
     static boolean validateEmail(String email) {
         return email != null && EMAIL_PATTERN.matcher(email).matches()
     }
 
-    /**
-     * Valida el formato de una contraseña.
-     *
-     * @param password La contraseña a validar.
-     * @return Un mensaje indicando si la contraseña es válida o los errores encontrados.
-     */
     static String validatePassword(String password) {
         if (password == null) {
             return "La contraseña no puede ser nula"

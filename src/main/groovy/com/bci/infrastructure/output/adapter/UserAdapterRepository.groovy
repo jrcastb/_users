@@ -46,7 +46,8 @@ class UserAdapterRepository implements UserDb {
     @Override
     User save(User user) {
         try{
-            return mapper.toDomain(repository.save(mapper.toEntity(user)))
+            def result = mapper.toDomain(repository.save(mapper.toEntity(user)))
+            return result
         }catch (Exception e){
             throw new TechnicalException(e, TechnicalErrorMessage.UPDATE_TOKEN_AND_LAST_LOGIN)
         }

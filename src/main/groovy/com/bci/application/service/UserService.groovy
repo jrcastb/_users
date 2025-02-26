@@ -39,17 +39,10 @@ class UserService implements UserApi {
     @Override
     SignUpResponse signUp(SignUpRequest request) {
 
-        // Validar request
         validateRequest(request)
-
-        // Validar que el email no exista en la base de datos
         validateEmailExists(request.email)
-
-        // Encriptar contraseña
         String passwordEncrypt = JasyptEncryptorConfig.passwordEncryptor().encrypt(request.password)
         log.info("sign-up - Password encriptado: {}", passwordEncrypt)
-
-        // Generar token JWT
         String jwt = jwtUtil.generateToken(request.email)
 
         // Crear y guardar el usuario
@@ -61,30 +54,15 @@ class UserService implements UserApi {
 
     @Override
     LoginResponse login(String token) {
-        log.info("login - Inicio ServiceImpl")
-
-        // Validar token
         validateToken(token)
-
-        // Obtener email desde el token
         String email = jwtUtil.getEmailFromToken(token)
         log.info("login - Email obtenido: {}", email)
-
-        // Buscar usuario por email
         User user = userAdapterRepository.findByEmail(email).orElse(null)
-
-        // Validar token del usuario
         validateUserToken(user, token)
-
-        // Generar nuevo token y actualizar base de datos
         String newJwt = jwtUtil.generateToken(email)
         updateUserTokenAndLastLogin(newJwt, email)
-
-        // Armar respuesta
         StringEncryptor stringEncryptor = JasyptEncryptorConfig.passwordEncryptor()
         LoginResponse response = mapper.toLoginResponse(user, newJwt)
-        response.password = stringEncryptor.decrypt(response.password)
-
         return response
 
     }
@@ -111,7 +89,7 @@ class UserService implements UserApi {
     private void validateEmailExists(String email) {
         userAdapterRepository.findByEmail(email).ifPresent { user ->
             log.error("sign-up - Email ya registrado: {}", user.email)
-            new BusinessException(BusinessErrorMessage.BAD_REQUEST_BODY)
+            throw new BusinessException(BusinessErrorMessage.BAD_REQUEST_BODY)
         }
     }
 

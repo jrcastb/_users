@@ -3,7 +3,6 @@ package com.bci.infrastructure.config
 
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor
 import org.jasypt.encryption.pbe.config.SimpleStringPBEConfig
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
@@ -18,18 +17,11 @@ class JasyptEncryptorConfig {
     private static final String SALT_GENERATOR = "org.jasypt.salt.RandomSaltGenerator"
     private static final String OUTPUT_TYPE = "base64"
 
-    /**
-     * Crea y configura un encriptador de cadenas utilizando Jasypt.
-     *
-     * @return Un StringEncryptor configurado.
-     * @throws IllegalArgumentException Si la configuración es inválida.
-     */
     static PooledPBEStringEncryptor passwordEncryptor() {
         try {
             PooledPBEStringEncryptor encryptor = new PooledPBEStringEncryptor()
             SimpleStringPBEConfig config = new SimpleStringPBEConfig()
 
-            // Configuración del encriptador
             config.setPassword(ENCRYPTION_PASSWORD)  // Clave de encriptación (obtenida desde variables de entorno)
             config.setAlgorithm(ALGORITHM)
             config.setKeyObtentionIterations(KEY_OBTENTION_ITERATIONS)
@@ -38,7 +30,6 @@ class JasyptEncryptorConfig {
             config.setSaltGeneratorClassName(SALT_GENERATOR)
             config.setStringOutputType(OUTPUT_TYPE)
 
-            // Validar configuración antes de asignarla
             validateConfig(config)
 
             encryptor.setConfig(config)
@@ -48,12 +39,6 @@ class JasyptEncryptorConfig {
         }
     }
 
-    /**
-     * Valida la configuración del encriptador.
-     *
-     * @param config La configuración a validar.
-     * @throws IllegalArgumentException Si la configuración es inválida.
-     */
     private static void validateConfig(SimpleStringPBEConfig config) {
         if (config.getPassword() == null || config.getPassword().isEmpty()) {
             throw new IllegalArgumentException("La clave de encriptación no puede estar vacía")
