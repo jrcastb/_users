@@ -1,5 +1,7 @@
 package application.service
 
+import com.bci.repository.UserRepository
+import com.bci.repository.mapper.UserMapper
 import com.bci.service.impl.UserServiceImpl
 import com.bci.service.mapper.UserServiceMapperImpl
 import com.bci.domain.dto.LoginResponse
@@ -9,7 +11,6 @@ import com.bci.domain.dto.SignUpResponse
 import com.bci.domain.User
 import com.bci.exception.BusinessException
 import com.bci.helper.RequestValidator
-import com.bci.repository.impl.UserRepositoryImpl
 import com.bci.security.JwtUtil
 import spock.lang.Specification
 import spock.lang.Subject
@@ -19,14 +20,15 @@ import java.time.LocalDate
 class UserServiceImplSpec extends Specification {
 
     // Mocks para las dependencias
-    def userAdapterRepository = Mock(UserRepositoryImpl)
+    def userAdapterRepository = Mock(UserRepository)
     def jwtUtil = Mock(JwtUtil)
     def requestValidator = Mock(RequestValidator)
     def mapper = Mock(UserServiceMapperImpl)
+    def userMapper = Mock(UserMapper)
 
     // Sujeto de prueba (la clase que estamos probando)
     @Subject
-    def userService = new UserServiceImpl(requestValidator, userAdapterRepository, jwtUtil, mapper)
+    def userService = new UserServiceImpl(requestValidator, userAdapterRepository, jwtUtil, mapper, userMapper)
 
     // Datos de prueba
     def validEmail = "test@example.com"

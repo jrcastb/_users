@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -16,8 +17,9 @@ import javax.persistence.*;
 public class PhoneData {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "UUID")
+    @Column(name = "id", columnDefinition = "BINARY(16)")
+    private UUID id;
 
     private Long number;
 
@@ -26,10 +28,6 @@ public class PhoneData {
 
     @Column(name = "country_code")
     private String countryCode;
-
-    @ManyToOne
-    @JoinColumn(name = "userId")
-    private UserData user;
 
     public PhoneData(long number, int cityCode, String countryCode) {
         this.number = number;

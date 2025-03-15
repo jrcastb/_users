@@ -8,7 +8,10 @@ import com.bci.config.JasyptEncryptorConfig;
 import com.bci.exception.BusinessException;
 import com.bci.exception.messages.BusinessErrorMessage;
 import com.bci.helper.RequestValidator;
-import com.bci.repository.impl.UserRepositoryImpl;
+import com.bci.repository.UserRepository;
+//import com.bci.repository.impl.UserRepositoryImpl;
+import com.bci.repository.entity.UserData;
+import com.bci.repository.mapper.UserMapper;
 import com.bci.security.JwtUtil;
 import com.bci.service.UserService;
 import com.bci.service.mapper.UserServiceMapper;
@@ -24,9 +27,10 @@ import java.time.LocalDate;
 public class UserServiceImpl implements UserService {
 
     private final RequestValidator requestValidator;
-    private final UserRepositoryImpl userRepositoryImpl;
+    private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final UserServiceMapper mapper;
+    private final UserMapper userMapper;
 
     @Override
     public SignUpResponse signUp(SignUpRequest request) {
@@ -39,10 +43,12 @@ public class UserServiceImpl implements UserService {
         String jwt = jwtUtil.generateToken(request.getEmail());
 
         // Crear y guardar el usuario
-        User userEntity = mapper.toDomain(request, passwordEncrypt, jwt);
-
+        User userDomain = mapper.toDomain(request, passwordEncrypt, jwt);
+        UserData userData = userMapper.toEntity(userDomain);
+        UserData savedUser = userRepository.save(userData);
         // Armar respuesta
-        return mapper.toResponse(userRepositoryImpl.save(userEntity));
+        userDomain.setId(savedUser.getUserId());
+        return mapper.toResponse(userDomain);
     }
 
     @Override
@@ -52,9 +58,9 @@ public class UserServiceImpl implements UserService {
         String email = jwtUtil.getEmailFromToken(token);
         log.info("login - Email obtenido: {}", email);
 
-        User user = userRepositoryImpl.findByEmail(email)
+        UserData userData = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(BusinessErrorMessage.USER_NOT_FOUND));
-
+        User user = userMapper.toDomain(userData);
         validateUserToken(user, token);
 
         String newJwt = jwtUtil.generateToken(email);
@@ -83,7 +89,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void validateEmailExists(String email) {
-        userRepositoryImpl.findByEmail(email).ifPresent(user -> {
+        userRepository.findByEmail(email).ifPresent(user -> {
             log.error("sign-up - Email ya registrado: {}", user.getEmail());
             throw new BusinessException(BusinessErrorMessage.BAD_REQUEST_BODY);
         });
@@ -109,7 +115,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void updateUserTokenAndLastLogin(String newJwt, String email) {
-        userRepositoryImpl.updateTokenAndLastLogin(newJwt, LocalDate.now(), email);
+        userRepository.updateTokenAndLastLoginByEmail(newJwt, LocalDate.now(), email);
         log.info("login - Token y last_login actualizados");
     }
 }
