@@ -1,4 +1,4 @@
-import com.bci.infrastructure.security.JwtUtil
+import com.bci.security.JwtUtil
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm

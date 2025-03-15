@@ -1,11 +1,11 @@
 package infrastructure.output.adapter
 
 import com.bci.domain.User
-import com.bci.infrastructure.exception.TechnicalException
+import com.bci.exception.TechnicalException
 import com.bci.repository.impl.UserRepositoryImpl
 import com.bci.repository.mapper.UserMapper
-import com.bci.infrastructure.output.repository.UserRepository
-import com.bci.infrastructure.output.repository.entity.UserData
+import com.bci.repository.UserRepository
+import com.bci.repository.entity.UserData
 import spock.lang.Specification
 import spock.lang.Subject
 

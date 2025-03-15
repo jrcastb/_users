@@ -1,14 +1,16 @@
-import com.bci.application.service.UserService
-import com.bci.application.service.mapper.UserServiceMapperImpl
+package application.service
+
+import com.bci.service.impl.UserServiceImpl
+import com.bci.service.mapper.UserServiceMapperImpl
 import com.bci.domain.dto.LoginResponse
 import com.bci.domain.Phone
 import com.bci.domain.dto.SignUpRequest
 import com.bci.domain.dto.SignUpResponse
 import com.bci.domain.User
-import com.bci.infrastructure.exception.BusinessException
-import com.bci.infrastructure.helper.RequestValidator
+import com.bci.exception.BusinessException
+import com.bci.helper.RequestValidator
 import com.bci.repository.impl.UserRepositoryImpl
-import com.bci.infrastructure.security.JwtUtil
+import com.bci.security.JwtUtil
 import spock.lang.Specification
 import spock.lang.Subject
 
@@ -24,7 +26,7 @@ class UserServiceImplSpec extends Specification {
 
     // Sujeto de prueba (la clase que estamos probando)
     @Subject
-    def userService = new UserService(userAdapterRepository, jwtUtil, requestValidator, mapper)
+    def userService = new UserServiceImpl(requestValidator, userAdapterRepository, jwtUtil, mapper)
 
     // Datos de prueba
     def validEmail = "test@example.com"
@@ -58,7 +60,7 @@ class UserServiceImplSpec extends Specification {
         //mapper.toResponse(user) >> signUpResponse
 
 
-        when: "Se llama al método signUp"
+        when: "Se llama al metodo signUp"
         def result = userService.signUp(signUpRequest)
 
         then: "Se retorna una respuesta exitosa"

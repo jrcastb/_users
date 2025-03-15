@@ -1,6 +1,6 @@
 package infrastructure.input.adapter.rest
 
-import com.bci.application.service.UserService
+import com.bci.service.UserService
 import com.bci.domain.dto.SignUpRequest
 import com.bci.domain.dto.SignUpResponse
 import com.bci.domain.dto.LoginResponse

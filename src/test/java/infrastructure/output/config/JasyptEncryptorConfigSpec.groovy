@@ -1,6 +1,6 @@
 package infrastructure.output.config
 
-import com.bci.infrastructure.config.JasyptEncryptorConfig
+import com.bci.config.JasyptEncryptorConfig
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor
 import org.jasypt.encryption.pbe.config.SimpleStringPBEConfig
 import spock.lang.Specification
