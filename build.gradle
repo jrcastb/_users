@@ -1,5 +1,7 @@
 plugins {
-    id 'groovy'
+    id 'java'  // Usamos Java como lenguaje principal
+    id 'org.springframework.boot' version '2.5.14'  // Versión de Spring Boot
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'  // Gestión de dependencias de Spring Boot
 }
 
 group = 'org.example'
@@ -7,7 +9,7 @@ version = '1.0-SNAPSHOT'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
+        languageVersion = JavaLanguageVersion.of(11)  // Java 11
     }
 }
 
@@ -16,26 +18,40 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.codehaus.groovy:groovy-all:3.0.6'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.7.5'
-    implementation 'org.springframework.boot:spring-boot-starter-security:2.7.5'
-    implementation 'org.springframework.boot:spring-boot-starter-validation:2.7.5'
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.7.5'
-    implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.3'
+    // Spring Boot Starters
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // JWT
     implementation 'io.jsonwebtoken:jjwt:0.9.1'
+
+    // Jasypt (encriptación)
+    implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.3'
+
+    // Base de datos H2 (para pruebas)
     runtimeOnly 'com.h2database:h2:2.2.220'
+
+    // Lombok (para reducir código boilerplate)
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.5'
-    testImplementation 'org.springframework.security:spring-security-test:5.7.5'
-    testImplementation 'org.spockframework:spock-core:2.0-groovy-3.0'
-    testImplementation 'org.codehaus.groovy:groovy-all:3.0.6'
+
+    // JAXB (para manejo de XML)
     implementation 'javax.xml.bind:jaxb-api:2.3.1'
     implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
+
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.spockframework:spock-core:2.0-groovy-3.0'  // Spock para pruebas
+    testImplementation 'org.codehaus.groovy:groovy-all:3.0.6'  // Groovy para Spock
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'  // JUnit 5 (opcional, para coexistencia)
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'  // JUnit 5 (opcional, para coexistencia)
 }
 
 tasks.named('test') {
-    useJUnitPlatform()
+    useJUnitPlatform()  // Usar JUnit Platform para ejecutar pruebas (Spock es compatible)
     testLogging {
         events "passed", "skipped", "failed"
     }
